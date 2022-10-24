@@ -32,36 +32,3 @@ app.listen(port, () => {
 
 const googlesheetsAPI = require('./google_sheets/gs.api');
 console.log(googlesheetsAPI.connectAPI('google_sheets/likpro-366122-75dfee8feca3.json'));
-
-// const axios = require('axios')
-
-//   const srcstr = {
-//       autopayID: 14880,
-//   }
-//   axios.get('http://localhost:8080/clients/autopayclient', srcstr)
-//               .then(res => {
-//                 if(res.data.length > 0) {
-//                   console.log(res)
-//                 } else {
-//                   console.log(res.data)
-//                 }
-//             })
-
-// const axios = require("axios");
-// async function getData() {
-//   return await axios.get("https://jsonplaceholder.typicode.com/todos");
-// }
-// module.exports = { getData };
-
-
-// async function findClient(id) {
-//     const data = await Client.find({ autopayID: 14880 })
-//     .then(data => {
-//         console.log(data)
-//     })
-//     .catch(err => {
-//         console.log(err)
-//     })
-// }
-
-// findClient(14880)
