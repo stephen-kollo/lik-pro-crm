@@ -14,8 +14,8 @@ const clientSchema = new Schema({
     phone: { type: String, required: true },
     ip: { type: String, required: true },
     managerComment: { type: String, required: true },
-    managerName: { type: String, required: true },
-    leadType: { type: String, required: true },
+    managerName: [],
+    leadType: [],
     managerPayout: { type: Number, required: true },
 }, {
     timestamps: true,

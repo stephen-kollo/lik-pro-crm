@@ -1,9 +1,13 @@
 const {Builder, Browser, By, Key, until} = require('selenium-webdriver');
 require('chromedriver');
 
+const salesNames = ["tatianaf", "ekaterinag", "nellik", "nataliaa", "natalias", "veras", "dinak", "irinak", "ekaterinam", "oksanap", "yanap"];
+const leadTypes = ["lead", "web", "elite", "reg", "other"];
+const payoutSchema = { lead: 0.05, web: 0.035, elite: 0.025, reg: 0.05, other: 0.05 };
+
 module.exports.addAutopayClientData = async function addAutopayClientData() {
     const driver = await buildDriver()
-    await getWeeklyDataAutopay(driver, By);
+    await getDailyDataAutopay(driver, By);
     await setTimeout(function () { addAutopayXLStoDB() }, 1000);
   };
 
@@ -11,7 +15,8 @@ async function buildDriver() {
     let driver = await new Builder().forBrowser("chrome").build();
     return driver;
 };
-async function getWeeklyDataAutopay(driver, By) {
+
+async function getDailyDataAutopay(driver, By) {
     const autopayLogin = 'selenium';
     const autopayPassword = 'selenium1924';
     try {
@@ -90,6 +95,13 @@ function convertAutopayXLStoDBformat(xlsFile) {
     var clientsData = [];
 
     rawClientsData.forEach(clientData => {
+
+        const setRevenue = (revenue) => {
+            return Number(revenue.toString()
+                .substring(0, clientData.get(clientMap.get('revenue'))
+                .toString().length - 3))
+        }
+
         const setStatus = (status) => {
             if(status == "Нет") {
                 return false;
@@ -100,39 +112,90 @@ function convertAutopayXLStoDBformat(xlsFile) {
             return date.substring(6,10)+"-"+date.substring(3,5)+"-"+date.substring(0,2)
         }
 
-        const setManagerComment = (comment) => {
-            if(comment === undefined) {
-                return "none" 
-            } else return comment
-        }
         const setPhoneNum = (phone) => {
             if(phone === undefined) {
                 return "none" 
             } else return phone
         }
 
+        const setManagerComment = (comment) => {
+            if(comment === undefined) {
+                return "none" 
+            } else return comment
+        }
+
+        const setManagerName = (managerComment)  => {
+            var managerName = []
+            salesNames.forEach(name => {
+                if ( managerComment.toLowerCase().indexOf(name) > 0 ) {
+                    managerName.push(name)
+                }
+            })
+            return managerName;
+        }
+
+        const setLeadType = (managerComment, revenue) => {
+            var leadType = [];
+            leadTypes.forEach(type => {
+                if ( managerComment.toLowerCase().indexOf(type) > 0 ) {
+                    leadType.push(type)
+                }
+            })
+            if(revenue > 100000) {
+                if (leadType.indexOf("elite") == -1) {
+                    leadType.push("elite")
+                }
+            }
+            return leadType;
+        }
+
+        const setManagerPayout = (revenue, status, managerName, leadType) => {
+            var payout = 0;
+            if (status && managerName.length !== 0) {
+                if( leadType.indexOf("elite") !== -1 ) {
+                    payout = revenue * payoutSchema.elite / managerName.length;
+                } else if ( leadType.indexOf("web") !== -1 ) {
+                    payout = revenue * payoutSchema.web / managerName.length;
+                } else if ( leadType.length > 0 ) {
+                    payout = revenue * payoutSchema.lead / managerName.length;
+                } 
+            }
+            return payout;
+        }
+
+        const revenue = setRevenue(clientData.get(clientMap.get('revenue')));
+        const status = setStatus(clientData.get(clientMap.get('status')));
+        const dateCreate = setDate(clientData.get(clientMap.get('dateCreate')));
+        const datePaid = setDate(clientData.get(clientMap.get('datePaid')));
+        const phone = setPhoneNum(clientData.get(clientMap.get('phone')));
+        const managerComment = setManagerComment(clientData.get(clientMap.get('managerComment')));
+        const managerName = setManagerName(managerComment); 
+        const leadType = setLeadType(managerComment, revenue);
+        const managerPayout = setManagerPayout(revenue, status, managerName, leadType);
+
         const temp = new Map()
             .set('autopayID', clientData.get(clientMap.get('autopayID')))
             .set('clientName', clientData.get(clientMap.get('clientName')))
             .set('email', clientData.get(clientMap.get('email')))
-            .set('revenue', clientData.get(clientMap.get('revenue')).toString()
-                .substring(0, clientData.get(clientMap.get('revenue')).toString().length - 3))
-            .set('status', setStatus(clientData.get(clientMap.get('status'))))
-            .set('dateCreate', setDate(clientData.get(clientMap.get('dateCreate'))))
-            .set('datePaid', setDate(clientData.get(clientMap.get('datePaid'))))
+            .set('revenue', revenue)
+            .set('status', status)
+            .set('dateCreate', dateCreate)
+            .set('datePaid', datePaid)
             .set('product', clientData.get(clientMap.get('product')))
-            .set('phone', setPhoneNum(clientData.get(clientMap.get('phone'))))
+            .set('phone', phone)
             .set('ip', clientData.get(clientMap.get('ip')))
-            .set('managerComment', setManagerComment(clientData.get(clientMap.get('managerComment'))))
-            .set('managerName', 'none')
-            .set('leadType', 'lead')
-            .set('managerPayout', 0)
+            .set('managerComment', managerComment)
+            .set('managerName', managerName)
+            .set('leadType', leadType)
+            .set('managerPayout', managerPayout)
 
+            temp.managerName = [14]
         clientsData.push(temp);    
     });
 
     return clientsData;
 };
+
 
 async function addClientsToDB(clientsData) {
     const client = {
@@ -152,15 +215,17 @@ async function addClientsToDB(clientsData) {
         managerPayout: clientsData.get('managerPayout'),
     };
 
-    findClientByAutopayID(clientsData, client)
+    checkNewClientByAutopayID(clientsData, client)
 };
-
-function findClientByAutopayID(clientsData, client) {
+function checkNewClientByAutopayID(clientsData, client) {
     const axios = require('axios');
     var id = '';
     axios.get(`http://localhost:8080/clients/autopay/${clientsData.get('autopayID')}/`)
         .then(res => { if(res.data.length > 0) id = res.data[0]._id })
-        .then(res =>{
+        .then( res => {
+            console.log(client)   
+        })
+        .then( res => {
             if(id.length > 0) {
                 axios.post('http://localhost:8080/clients/update/'+id, client)
                     .then( res => console.log("ID: " + id + " with autopayID: " + client.autopayID + " was edited"));
@@ -170,5 +235,4 @@ function findClientByAutopayID(clientsData, client) {
             }
         });
 };
-
   
