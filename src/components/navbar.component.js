@@ -11,13 +11,7 @@ export default function Navbar() {
         <nav className="navbar navbar-dark bg-dark navbar-expand-lg">
                 <ul className="navbar-nav mr-auto">
                     <li className="navbar-item">
-                        <NavLink to="/" className="nav-link">Exercises</NavLink>
-                    </li>
-                    <li className="navbar-item">
-                        <NavLink to="/create" className="nav-link">Create Exercise Log</NavLink>
-                    </li>
-                    <li className="navbar-item">
-                        <NavLink to="/user" className="nav-link">Create User</NavLink>
+                        <NavLink to="/" className="nav-link">Clients</NavLink>
                     </li>
                  </ul>
         </nav>
