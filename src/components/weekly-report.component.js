@@ -30,15 +30,15 @@ export default class WeeklyReport extends Component {
         });
     };
 
-    onChangeDateStart(e) {
+    onChangeDateStart(date) {
         this.setState({
-            datestart: e.target.value
+            datestart: date
         });
     };
     
-    onChangeDateEnd(e) {
+    onChangeDateEnd(date) {
         this.setState({
-            dateend: e.target.value
+            dateend: date
         });
     };
 
@@ -47,7 +47,7 @@ export default class WeeklyReport extends Component {
             this.setState({
                 status: 'Report successfully exported!'
             });
-            document.body.style.color = 'darkgreen';
+            document.getElementById('status').style.color = 'darkgreen';
             this.setState({
                 buttontext: 'Open Report'
             });
@@ -55,25 +55,21 @@ export default class WeeklyReport extends Component {
             this.setState({
                 status: 'Incorrect Google Sheet URL'
             });
-            document.body.style.color = 'red';
+            document.getElementById('status').style.color = 'red';
         }
-        
     };
 
     onSubmit(e) {
+        e.preventDefault();
         if (this.state.buttontext === 'Open Report') {
             window.open(this.state.link,'_blank');
             return true;
         }
-
-        console.log()
-        e.preventDefault();
-
+        
         const getGoogleSheetID = (link)  => {
             const temp = link.substring(link.indexOf('/d/') + 3)
             return temp.substring(0, temp.indexOf('/'))
         };
-        
         const reportData = {
             link: getGoogleSheetID(this.state.link), 
             datestart: this.state.datestart,
@@ -82,10 +78,8 @@ export default class WeeklyReport extends Component {
        
         axios.post('http://localhost:8080/clients/paste_weekly_report', reportData)
             .then( res => this.onChangeStatus(res.data))
-        // window.location = "/";
     };
 
-        
     render() {
         var status = this.state.status.toString();
         var buttontext = this.state.buttontext.toString();
@@ -109,8 +103,7 @@ export default class WeeklyReport extends Component {
                         { height: '100px' }
                         }>
                         <div className="input" style={{
-                            position: 'absolute',
-                            
+                            position: 'absolute',  
                         }}>
                             <DatePicker 
                                 selected={this.state.datestart}
@@ -132,7 +125,7 @@ export default class WeeklyReport extends Component {
                     <div className="action">
                         <button className="action-button">{buttontext}</button>
                     </div>
-                    <p  className="status">{status}</p>
+                    <p id="status" className="status">{status}</p>
                 </form>
             </div>
         </div>

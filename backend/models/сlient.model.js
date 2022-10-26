@@ -17,6 +17,11 @@ const clientSchema = new Schema({
     managerName: [],
     leadType: [],
     managerPayout: { type: Number, required: true },
+    partner: { type: String, required: true },
+    partnerPayout: { type: Number, required: true },
+    source: { type: String, required: true },
+    dateTouch: { type: Date, required: true },
+    dateWeb: { type: Date, required: true },
 }, {
     timestamps: true,
 });

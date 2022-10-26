@@ -4,8 +4,8 @@ const axios = require('axios');
 
 module.exports.addAutopayClientData = async function addAutopayClientData() {
     const settings = await axiosGetSettings();
-    const driver = await buildDriver()
-    await getDailyDataAutopay(driver, By, settings);
+    // const driver = await buildDriver()
+    // await getDailyDataAutopay(driver, By, settings);
     await setTimeout(function () { addAutopayXLStoDB(settings) }, 1000);
 };
 
@@ -97,6 +97,7 @@ function convertAutopayXLStoDBformat(xlsFile, settings) {
         .set('phone', 'Телефон')
         .set('ip', 'IP')
         .set('managerComment', 'Служебные комментарии')
+        .set('partner', 'Партнер')
     
     var clientsData = [];
 
@@ -128,6 +129,12 @@ function convertAutopayXLStoDBformat(xlsFile, settings) {
             if(comment === undefined) {
                 return "none" 
             } else return comment
+        }
+
+        const setPartner = (partner) => {
+            if(partner === undefined) {
+                return "none" 
+            } else return partner
         }
 
         const setManagerName = (managerComment, settings)  => {
@@ -186,6 +193,11 @@ function convertAutopayXLStoDBformat(xlsFile, settings) {
         const managerName = setManagerName(managerComment, settings); 
         const leadType = setLeadType(managerComment, revenue, settings);
         const managerPayout = setManagerPayout(revenue, status, managerName, leadType, settings);
+        const partner = setPartner(clientData.get(clientMap.get('partner')));
+        const partnerPayout = 0;
+        const source = 'source';
+        const dateTouch = new Date();
+        const dateWeb = new Date();
 
         const temp = new Map()
             .set('autopayID', clientData.get(clientMap.get('autopayID')))
@@ -202,8 +214,13 @@ function convertAutopayXLStoDBformat(xlsFile, settings) {
             .set('managerName', managerName)
             .set('leadType', leadType)
             .set('managerPayout', managerPayout)
+            .set('partner', partner)
+            .set('partnerPayout', partnerPayout)
+            .set('source', source)
+            .set('dateTouch', dateTouch)
+            .set('dateWeb', dateWeb)
 
-            temp.managerName = [14]
+            temp.managerName = []
         clientsData.push(temp);    
     });
 
@@ -227,6 +244,11 @@ async function addClientsToDB(clientsData) {
         managerName: clientsData.get('managerName'),
         leadType: clientsData.get('leadType'),
         managerPayout: clientsData.get('managerPayout'),
+        partner: clientsData.get('partner'),
+        partnerPayout: clientsData.get('partnerPayout'),
+        source: clientsData.get('source'),
+        dateTouch: clientsData.get('dateTouch'),
+        dateWeb: clientsData.get('dateWeb'),
     };
 
     checkNewClientByAutopayID(clientsData, client)

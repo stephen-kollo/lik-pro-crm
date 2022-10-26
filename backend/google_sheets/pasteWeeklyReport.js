@@ -57,7 +57,9 @@ async function setDataToGS(clients, sheet) {
     "Manager Comment",
     "Manager Name",
     "Lead Type",
-    "Manager Payout"
+    "Manager Payout",
+    "Partner",
+    "Partner Payout"
   ];
 
   for ( var i = 0; i < columnSchema.length; i++ ) {
@@ -112,6 +114,12 @@ async function setDataToGS(clients, sheet) {
             break; 
           case 13:
             cell.value = clients[i].managerPayout;
+            break;
+          case 14:
+            cell.value = clients[i].partner;
+            break;
+          case 15:
+            cell.value = clients[i].partnerPayout;
             break;
           default:
             console.log('default');
