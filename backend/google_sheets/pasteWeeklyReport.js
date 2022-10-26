@@ -5,7 +5,15 @@ const { GoogleSpreadsheet } = require('google-spreadsheet');
 const CREDENTIALS = require('./creds');
 
 module.exports.pasteWeeklyReport = async function pasteWeeklyReport(docID, datestart, dateend) {
-  const doc = new GoogleSpreadsheet(docID);
+  try {
+    doc = new GoogleSpreadsheet(docID);
+  } catch (e) {
+    console.log(e)
+  }
+  if (doc.spreadsheetId.length < 10) {
+    return false;
+  }
+  
   await doc.useServiceAccountAuth({
   client_email: CREDENTIALS.client_email,
   private_key: CREDENTIALS.private_key,
@@ -14,7 +22,8 @@ module.exports.pasteWeeklyReport = async function pasteWeeklyReport(docID, dates
 
   const clients = await getClientsFromDBbyDate(datestart, dateend)
   const sheet = doc.sheetsByIndex[0]; 
-  setDataToGS(clients, sheet)
+  setDataToGS(clients, sheet);
+  return true;
 }
 
 async function getClientsFromDBbyDate(datestart, dateend) {

@@ -4,6 +4,7 @@ import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import './weekly-report.css';
 
+
 export default class WeeklyReport extends Component {
     constructor(props) {
         super(props);
@@ -11,25 +12,16 @@ export default class WeeklyReport extends Component {
         this.onChangeLink = this.onChangeLink.bind(this);
         this.onChangeDateStart = this.onChangeDateStart.bind(this);
         this.onChangeDateEnd = this.onChangeDateEnd.bind(this);
+        this.onChangeStatus = this.onChangeStatus.bind(this);
         this.onSubmit = this.onSubmit.bind(this);
 
         this.state = {
             link: '',
             datestart: new Date(),
             dateend: new Date(),
+            status: '',
+            buttontext: 'Create Report'
         };
-    };
-
-    componentDidMount() {
-        // axios.get('http://localhost:8080/users/')
-        //     .then(response => {
-        //         if(response.data.length > 0) {
-        //             this.setState({
-        //                 users: response.data.map(user => user.username),
-        //                 username: response.data[0].username
-        //             })
-        //         }
-        //     })
     };
 
     onChangeLink(e) {
@@ -38,19 +30,42 @@ export default class WeeklyReport extends Component {
         });
     };
 
-    onChangeDateStart(date) {
+    onChangeDateStart(e) {
         this.setState({
-            datestart: date
+            datestart: e.target.value
         });
     };
     
-    onChangeDateEnd(date) {
+    onChangeDateEnd(e) {
         this.setState({
-            dateend: date
+            dateend: e.target.value
         });
     };
 
+    onChangeStatus(statusBool) {
+        if (statusBool) {
+            this.setState({
+                status: 'Report successfully exported!'
+            });
+            document.body.style.color = 'darkgreen';
+            this.setState({
+                buttontext: 'Open Report'
+            });
+        } else {
+            this.setState({
+                status: 'Incorrect Google Sheet URL'
+            });
+            document.body.style.color = 'red';
+        }
+        
+    };
+
     onSubmit(e) {
+        if (this.state.buttontext === 'Open Report') {
+            window.open(this.state.link,'_blank');
+            return true;
+        }
+
         console.log()
         e.preventDefault();
 
@@ -64,15 +79,16 @@ export default class WeeklyReport extends Component {
             datestart: this.state.datestart,
             dateend: this.state.dateend
         };
-
+       
         axios.post('http://localhost:8080/clients/paste_weekly_report', reportData)
-            .then( res => console.log(res.data));
-
+            .then( res => this.onChangeStatus(res.data))
         // window.location = "/";
     };
 
         
     render() {
+        var status = this.state.status.toString();
+        var buttontext = this.state.buttontext.toString();
         return ( 
         <div className="container">
             <div className="card">
@@ -114,8 +130,9 @@ export default class WeeklyReport extends Component {
                         </div>	
                     </div>
                     <div className="action">
-                        <button className="action-button">Create Report</button>
+                        <button className="action-button">{buttontext}</button>
                     </div>
+                    <p  className="status">{status}</p>
                 </form>
             </div>
         </div>

@@ -84,7 +84,8 @@ router.route('/update/:id').post((req, res) => {
 
 router.route('/paste_weekly_report').post((req, res) => {
     const googlesheetsAPI = require('../google_sheets/pasteWeeklyReport');
-    googlesheetsAPI.pasteWeeklyReport(req.body.link, req.body.datestart, req.body.dateend);
+    googlesheetsAPI.pasteWeeklyReport(req.body.link, req.body.datestart, req.body.dateend)
+    .then((status) => { res.json(status) });
 });
 
 router.route('/datepaid/:start/:end').get((req, res) => {
