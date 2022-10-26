@@ -21,14 +21,13 @@ connection.once('open', () => {
 const exercisesRouter = require('./routes/exercises');
 const usersRouter = require('./routes/users');
 const clientsRouter = require('./routes/clients');
+const settingsRouter = require('./routes/settings')
 
 app.use('/exercises', exercisesRouter);
 app.use('/users', usersRouter);
 app.use('/clients', clientsRouter);
+app.use('/settings', settingsRouter);
 
 app.listen(port, () => {
     console.log(`Server is running on port: ${port}`);
 });
-
-const googlesheetsAPI = require('./google_sheets/gs.api');
-console.log(googlesheetsAPI.connectAPI('google_sheets/likpro-366122-75dfee8feca3.json'));

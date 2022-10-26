@@ -7,13 +7,14 @@ const Client = props => (
         <td>{props.client.clientName}</td>
         <td>{props.client.email}</td>
         <td>{props.client.revenue}</td>
-        <td>{props.client.status}</td>
+        <td>{props.client.status.toString()}</td>
         <td>{props.client.dateCreate}</td>
         <td>{props.client.datePaid}</td>
         <td>{props.client.product}</td>
         <td>{props.client.phone}</td>
         <td>{props.client.ip}</td>
         <td>{props.client.managerComment}</td>
+        <td>{props.client.managerName}</td>
         <td>{props.client.leadType}</td>
         <td>{props.client.managerPayout}</td>
         <td>
@@ -76,6 +77,7 @@ export default class ClientList extends Component {
                             <th>Phone Number</th>
                             <th>IP</th>
                             <th>Manager Comment</th>
+                            <th>Manager Name</th>
                             <th>Lead Type</th>
                             <th>Manager Payout</th>
                             <th>Actions</th>

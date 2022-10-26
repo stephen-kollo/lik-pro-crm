@@ -13,6 +13,9 @@ export default function Navbar() {
                     <li className="navbar-item">
                         <NavLink to="/" className="nav-link">Clients</NavLink>
                     </li>
+                    <li className="navbar-item">
+                        <NavLink to="/weekly_report" className="nav-link">Weekly Report</NavLink>
+                    </li>
                  </ul>
         </nav>
         

@@ -1,24 +1,29 @@
 const {Builder, Browser, By, Key, until} = require('selenium-webdriver');
 require('chromedriver');
-
-const salesNames = ["tatianaf", "ekaterinag", "nellik", "nataliaa", "natalias", "veras", "dinak", "irinak", "ekaterinam", "oksanap", "yanap"];
-const leadTypes = ["lead", "web", "elite", "reg", "other"];
-const payoutSchema = { lead: 0.05, web: 0.035, elite: 0.025, reg: 0.05, other: 0.05 };
+const axios = require('axios');
 
 module.exports.addAutopayClientData = async function addAutopayClientData() {
+    const settings = await axiosGetSettings();
     const driver = await buildDriver()
-    await getDailyDataAutopay(driver, By);
-    await setTimeout(function () { addAutopayXLStoDB() }, 1000);
+    await getDailyDataAutopay(driver, By, settings);
+    await setTimeout(function () { addAutopayXLStoDB(settings) }, 1000);
   };
+
+async function axiosGetSettings() {
+    return axios.get(`http://localhost:8080/settings/`)
+        .then( res => {
+            return res.data[0]
+        });
+}
 
 async function buildDriver() {
     let driver = await new Builder().forBrowser("chrome").build();
     return driver;
 };
 
-async function getDailyDataAutopay(driver, By) {
-    const autopayLogin = 'selenium';
-    const autopayPassword = 'selenium1924';
+async function getDailyDataAutopay(driver, By, settings) {
+    const autopayLogin = settings.autopaySettings.login;
+    const autopayPassword = settings.autopaySettings.password;
     try {
         await driver.get('https://shkolalik878.e-autopay.com/adminka/login/co-worker');
         await driver.findElement(By.id('inputEmail')).sendKeys(autopayLogin);
@@ -33,10 +38,11 @@ async function getDailyDataAutopay(driver, By) {
     };
 };
 
-function addAutopayXLStoDB() {
-    const filePath = '../../../../../../../Users/stepan/Downloads/' + getFileName('../../../../../../../Users/stepan/Downloads/').file;
+function addAutopayXLStoDB(settings) {
+    const downloadPath = settings.autopaySettings.downloadPath;
+    const filePath = downloadPath + getFileName(downloadPath).file;
     const xlsFile = parseXLS(filePath);
-    const clients = convertAutopayXLStoDBformat(xlsFile[0].data);
+    const clients = convertAutopayXLStoDBformat(xlsFile[0].data, settings);
     clients.forEach(client => {
         addClientsToDB(client);
     });
@@ -73,7 +79,7 @@ function parseXLS(path) {
     return parse(path)
 };
 
-function convertAutopayXLStoDBformat(xlsFile) {
+function convertAutopayXLStoDBformat(xlsFile, settings) {
     var rawClientsData = [];
     xlsFile.forEach(clientData => {
         rawClientsData.push( new Map(Object.entries(clientData)) );
@@ -124,9 +130,9 @@ function convertAutopayXLStoDBformat(xlsFile) {
             } else return comment
         }
 
-        const setManagerName = (managerComment)  => {
+        const setManagerName = (managerComment, settings)  => {
             var managerName = []
-            salesNames.forEach(name => {
+            settings.autopaySettings.salesNames.forEach(name => {
                 if ( managerComment.toLowerCase().indexOf(name) > 0 ) {
                     managerName.push(name)
                 }
@@ -134,9 +140,9 @@ function convertAutopayXLStoDBformat(xlsFile) {
             return managerName;
         }
 
-        const setLeadType = (managerComment, revenue) => {
+        const setLeadType = (managerComment, revenue, settings) => {
             var leadType = [];
-            leadTypes.forEach(type => {
+            settings.autopaySettings.leadTypes.forEach(type => {
                 if ( managerComment.toLowerCase().indexOf(type) > 0 ) {
                     leadType.push(type)
                 }
@@ -149,15 +155,23 @@ function convertAutopayXLStoDBformat(xlsFile) {
             return leadType;
         }
 
-        const setManagerPayout = (revenue, status, managerName, leadType) => {
+        const setManagerPayout = (revenue, status, managerName, leadType, settings) => {
             var payout = 0;
             if (status && managerName.length !== 0) {
                 if( leadType.indexOf("elite") !== -1 ) {
-                    payout = revenue * payoutSchema.elite / managerName.length;
+                    payout = revenue * settings.autopaySettings.payoutSchema.elite / managerName.length;
                 } else if ( leadType.indexOf("web") !== -1 ) {
-                    payout = revenue * payoutSchema.web / managerName.length;
-                } else if ( leadType.length > 0 ) {
-                    payout = revenue * payoutSchema.lead / managerName.length;
+                    payout = revenue * settings.autopaySettings.payoutSchema.web / managerName.length;
+                } else if ( leadType.indexOf("lead") !== -1 ) {
+                    payout = revenue * settings.autopaySettings.payoutSchema.lead / managerName.length;
+                } else if ( leadType.indexOf("reg") !== -1 ) {
+                    payout = revenue * settings.autopaySettings.payoutSchema.reg / managerName.length;
+                } else if ( leadType.indexOf("other") !== -1 ) {
+                    payout = revenue * settings.autopaySettings.payoutSchema.other / managerName.length;
+                } else if ( leadType.indexOf("bot") !== -1 ) {
+                    payout = revenue * settings.autopaySettings.payoutSchema.bot / managerName.length;
+                } else {
+                    payout = settings.autopaySettings.payoutSchema.empty;
                 } 
             }
             return payout;
@@ -169,9 +183,9 @@ function convertAutopayXLStoDBformat(xlsFile) {
         const datePaid = setDate(clientData.get(clientMap.get('datePaid')));
         const phone = setPhoneNum(clientData.get(clientMap.get('phone')));
         const managerComment = setManagerComment(clientData.get(clientMap.get('managerComment')));
-        const managerName = setManagerName(managerComment); 
-        const leadType = setLeadType(managerComment, revenue);
-        const managerPayout = setManagerPayout(revenue, status, managerName, leadType);
+        const managerName = setManagerName(managerComment, settings); 
+        const leadType = setLeadType(managerComment, revenue, settings);
+        const managerPayout = setManagerPayout(revenue, status, managerName, leadType, settings);
 
         const temp = new Map()
             .set('autopayID', clientData.get(clientMap.get('autopayID')))
@@ -218,13 +232,9 @@ async function addClientsToDB(clientsData) {
     checkNewClientByAutopayID(clientsData, client)
 };
 function checkNewClientByAutopayID(clientsData, client) {
-    const axios = require('axios');
     var id = '';
-    axios.get(`http://localhost:8080/clients/autopay/${clientsData.get('autopayID')}/`)
+    axios.get(`http://localhost:8080/clients/autopayid/${clientsData.get('autopayID')}/`)
         .then(res => { if(res.data.length > 0) id = res.data[0]._id })
-        .then( res => {
-            console.log(client)   
-        })
         .then( res => {
             if(id.length > 0) {
                 axios.post('http://localhost:8080/clients/update/'+id, client)

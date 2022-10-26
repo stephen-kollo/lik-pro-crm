@@ -6,6 +6,8 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "jquery/dist/jquery.min.js";
 import ClientsList from "./components/clients-list.component";
 import Navbar from './components/navbar.component';
+import WeeklyReport from './components/weekly-report.component';
+
 
 function App() {
     return (
@@ -14,7 +16,7 @@ function App() {
         <Navbar /> 
         <Routes>
           <Route path="/" element={<ClientsList/>} />
-          {/* <Route path="/edit/:id" element={<EditClient/>} /> */}
+          <Route path="/weekly_report" element={<WeeklyReport/>} />
         </Routes>
       </div>
     );
