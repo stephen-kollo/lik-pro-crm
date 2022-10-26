@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import axios from 'axios';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
+import './weekly-report.css';
 
 export default class WeeklyReport extends Component {
     constructor(props) {
@@ -50,9 +51,16 @@ export default class WeeklyReport extends Component {
     };
 
     onSubmit(e) {
+        console.log()
         e.preventDefault();
+
+        const getGoogleSheetID = (link)  => {
+            const temp = link.substring(link.indexOf('/d/') + 3)
+            return temp.substring(0, temp.indexOf('/'))
+        };
+        
         const reportData = {
-            link: this.state.link, 
+            link: getGoogleSheetID(this.state.link), 
             datestart: this.state.datestart,
             dateend: this.state.dateend
         };
@@ -65,46 +73,52 @@ export default class WeeklyReport extends Component {
 
         
     render() {
-        return (
-            <div>
-                <h3>Create New Exercise Log</h3>
-                <form onSubmit={this.onSubmit}>
-                    <div className='form-group'>
-                        <label>Google Sheet Link: </label>
-                        <input
-                            type="text"
-                            required
-                            className='form-control'
-                            value={this.state.link}
+        return ( 
+        <div className="container">
+            <div className="card">
+                <div className="card-image">	
+                    <h2 className="card-heading">Sales Weekly Report</h2>
+                </div>
+                <form onSubmit={this.onSubmit} className="card-form">
+                    <div className="input">
+                        <input 
+                            type="text" 
+                            className="input-field" 
+                            required value={this.state.link}
                             onChange={this.onChangeLink}
                         />
+                        <label className="input-label">Google Sheet URL</label>
                     </div>
-                    <br></br>
-                    <div className='form-group'>
-                        <label>Date Start: </label>
-                        <div>
-                            <DatePicker
+                    <div className="dates" style={
+                        { height: '100px' }
+                        }>
+                        <div className="input" style={{
+                            position: 'absolute',
+                            
+                        }}>
+                            <DatePicker 
                                 selected={this.state.datestart}
                                 onChange={this.onChangeDateStart}
                             />
+                            <label style={{ 'paddingBottom': '0.5rem'}} className="input-label">Start date</label>
                         </div>
-                    </div>
-                    <br></br>
-                    <div className='form-group'>
-                        <label>Date End: </label>
-                        <div>
-                            <DatePicker
+                        <div className="input" style={{
+                            position: 'absolute',
+                            right: '2rem'
+                        }}>
+                            <DatePicker 
                                 selected={this.state.dateend}
                                 onChange={this.onChangeDateEnd}
                             />
-                        </div>
+                            <label style={{ 'paddingBottom': '0.5rem'}} className="input-label">End date</label>
+                        </div>	
                     </div>
-                    <br></br>
-                    <div className='form-group'>
-                            <input type='submit' value='Create Sales Report' className='btn btn-primary' />
+                    <div className="action">
+                        <button className="action-button">Create Report</button>
                     </div>
                 </form>
             </div>
+        </div>
         );
     }
 }
