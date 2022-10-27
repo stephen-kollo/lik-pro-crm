@@ -32,7 +32,7 @@ async function getClientsFromDBbyDate(datestart, dateend) {
 };
 
 async function setDataToGS(clients, sheet) {
-  await sheet.loadCells( `A1:P${clients.length + 1}` );
+  await sheet.loadCells( `A1:S${clients.length + 1}` );
 
   const arrayToString = (array)  => {
     var string = '';
@@ -59,7 +59,10 @@ async function setDataToGS(clients, sheet) {
     "Lead Type",
     "Manager Payout",
     "Partner",
-    "Partner Payout"
+    "Partner Payout",
+    "Source",
+    "Date Touch",
+    "Date Web"
   ];
 
   for ( var i = 0; i < columnSchema.length; i++ ) {
@@ -120,6 +123,15 @@ async function setDataToGS(clients, sheet) {
             break;
           case 15:
             cell.value = clients[i].partnerPayout;
+            break;
+          case 16:
+            cell.value = clients[i].source;
+            break;
+          case 17:
+            cell.value = clients[i].dateTouch;
+            break;
+          case 18:
+            cell.value = clients[i].dateWeb;
             break;
           default:
             console.log('default');
