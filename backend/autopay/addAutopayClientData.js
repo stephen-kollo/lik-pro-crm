@@ -6,7 +6,7 @@ module.exports.addAutopayClientData = async function addAutopayClientData() {
     const settings = await axiosGetSettings();
     const driver = await buildDriver()
     await getDailyDataAutopay(driver, By, settings);
-    await setTimeout(function () { addAutopayXLStoDB(settings) }, 1000);
+    await setTimeout(async function () { addAutopayXLStoDB(settings) }, 1000);
 };
 
 async function axiosGetSettings() {

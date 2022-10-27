@@ -32,7 +32,7 @@ async function getClientsFromDBbyDate(datestart, dateend) {
 };
 
 async function setDataToGS(clients, sheet) {
-  await sheet.loadCells( `A1:S${clients.length + 1}` );
+  await sheet.loadCells( `A1:Z${clients.length + 1}` );
 
   const arrayToString = (array)  => {
     var string = '';

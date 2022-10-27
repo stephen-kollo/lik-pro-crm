@@ -12,6 +12,6 @@ const leadSchema = new Schema({
     timestamps: true,
 });
 
-const Lead = mongoose.model('Lead', exerciseSchema);
+const Lead = mongoose.model('Lead', leadSchema);
 
 module.exports = Lead;

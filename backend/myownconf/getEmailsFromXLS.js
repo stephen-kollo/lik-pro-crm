@@ -7,7 +7,7 @@ module.exports.getEmailsFromXLS =  async function getEmailsFromXLS() {
     data.forEach(visitor => {
         emails.push(visitor.Email)
     });
-    console.log(emails)
+    return emails;
 }
 
 function parseXLS(path) {
