@@ -2,17 +2,15 @@ const mongoose = require("mongoose");
 
 const Schema = mongoose.Schema;
 
-const leadSchema = new Schema({
+const webUTMSchema = new Schema({
     email: { type: String, required: true },
     source: { type: String, required: true },
     dateTouch: { type: Date, required: true },
-    dateWeb: { type: Date, required: true },
     webName: { type: String, required: true },
-    webID: { type: Number, required: true },
 }, {
     timestamps: true,
 });
 
-const Lead = mongoose.model('Lead', leadSchema);
+const WebUTM = mongoose.model('WebUTM', webUTMSchema);
 
-module.exports = Lead;
+module.exports = WebUTM;

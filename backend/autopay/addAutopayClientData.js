@@ -1,6 +1,7 @@
 const {Builder, Browser, By, Key, until} = require('selenium-webdriver');
 require('chromedriver');
 const axios = require('axios');
+const getSource = require('./getSource');
 
 module.exports.addAutopayClientData = async function addAutopayClientData() {
     const settings = await axiosGetSettings();
@@ -218,7 +219,9 @@ function convertAutopayXLStoDBformat(xlsFile, settings) {
             .set('partnerPayout', partnerPayout)
             .set('source', source)
             .set('dateTouch', dateTouch)
+            .set('touchWebName', '')
             .set('dateWeb', dateWeb)
+            .set('webName', '')
 
             temp.managerName = []
         clientsData.push(temp);    
@@ -229,7 +232,9 @@ function convertAutopayXLStoDBformat(xlsFile, settings) {
 
 
 async function addClientsToDB(clientsData) {
-    const client = {
+    const clientUTMdata = await getSource.getSource(clientsData.get('email'), new Date((clientsData.get('datePaid').substring(0,10))))
+        // .then(res => {console.log(res)})
+    const client = await {
         autopayID: clientsData.get('autopayID'),
         clientName: clientsData.get('clientName'),
         email: clientsData.get('email'),
@@ -246,12 +251,14 @@ async function addClientsToDB(clientsData) {
         managerPayout: clientsData.get('managerPayout'),
         partner: clientsData.get('partner'),
         partnerPayout: clientsData.get('partnerPayout'),
-        source: clientsData.get('source'),
-        dateTouch: clientsData.get('dateTouch'),
+        source: clientUTMdata.source,
+        dateTouch: clientUTMdata.dateTouch,
+        touchWebName: clientUTMdata.touchWebName,
         dateWeb: clientsData.get('dateWeb'),
+        webName: 'none',
     };
-
-    checkNewClientByAutopayID(clientsData, client)
+    await console.log(client.email)
+    await checkNewClientByAutopayID(clientsData, client)
 };
 function checkNewClientByAutopayID(clientsData, client) {
     var id = '';

@@ -14,6 +14,7 @@ router.route('/add').post((req, res) => {
     const dateTouch = Date.parse(req.body.dateTouch);
     const dateWeb = Date.parse(req.body.dateWeb);
     const webName = req.body.webName;
+    const webID = req.body.webID;
     
 
     const newLead = new Lead({
@@ -22,6 +23,7 @@ router.route('/add').post((req, res) => {
         dateTouch,
         dateWeb,
         webName,
+        webID,
     });
 
     newLead.save()
@@ -49,6 +51,7 @@ router.route('/update/:id').post((req, res) => {
         lead.dateTouch = req.body.dateTouch;
         lead.dateWeb = req.body.dateWeb;
         lead.webName = req.body.webName;
+        lead.webID = req.body.webID;
 
         lead.save()
             .then(() => res.json('Lead updated'))
@@ -69,10 +72,10 @@ router.route('/update/:id').post((req, res) => {
 //         .catch(err => res.status(400).json('Error: ' + err));
 // });
 
-// router.route('/autopayid/:autopayid').get((req, res) => {
-//     Client.find({ autopayID: req.params.autopayid, })
-//     .then(clients => res.json(clients))
-//         .catch(err => res.status(400).json('Error: ' + err));
-// });
+router.route('/webid/:webid/:email').get((req, res) => {
+    Lead.find({ webID: req.params.webid, email: req.params.email})
+    .then(leads => res.json(leads))
+        .catch(err => res.status(400).json('Error: ' + err));
+});
 
 module.exports = router;

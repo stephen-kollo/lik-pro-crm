@@ -21,10 +21,12 @@ connection.once('open', () => {
 const clientsRouter = require('./routes/clients');
 const settingsRouter = require('./routes/settings');
 const leadsRouter = require('./routes/leads');
+const webUTMrouter = require('./routes/webUTMs');
 
 app.use('/clients', clientsRouter);
 app.use('/settings', settingsRouter);
 app.use('/leads', leadsRouter);
+app.use('/webutms', webUTMrouter);
 
 app.listen(port, () => {
     console.log(`Server is running on port: ${port}`);

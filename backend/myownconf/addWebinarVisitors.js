@@ -22,16 +22,6 @@ async function buildDriver() {
 };
 
 getWebinarVisitors()
-// console.log(getDateFromWebName('7 октября 22г 20:00'))
-
-
-// async function getLastLine(driver, By) {
-//     await driver.findElement(By.className('group select default')).click()
-//     const pendingElements = await driver.findElements(By.className('line'))
-//     const element = await pendingElements[0].getText()
-//     console.log(element);
-// }
-
 
 async function getWebinarVisitors() {
     const driver = await buildDriver();
@@ -68,8 +58,8 @@ async function getWebinarVisitors() {
             const str = "//div[@data-val='" + lastWebID + "']";
             const name = await driver.findElement(By.xpath(str + "//span")).getText()
             dateWeb = await getDateFromWebName(name);
-            console.log('Currend web date...')
-            console.log(dateWeb)
+            console.log('Last web date...');
+            console.log(dateWeb);
             await driver.findElement(By.xpath(str)).click();
             await driver.findElement(By.xpath('/html/body/div[2]/div[3]/div[1]/div[2]/div[2]/div[1]')).click();
             await driver.findElement(By.className('export-att button border')).click();
@@ -84,6 +74,13 @@ async function getWebinarVisitors() {
         }, 30000);
     };
 };
+
+async function addLeadsToDB(emails, dateWeb, lastWebID) {
+    await emails.forEach( leadEmail => {
+        getLastTouch(leadEmail, new Date(dateWeb), lastWebID)
+            .then(res => { return res });
+    })
+}
 
 function getDateFromWebName(name) {
     const setYear = function(str) {
@@ -108,17 +105,64 @@ function getDateFromWebName(name) {
     return new Date(Date.UTC(setYear(temp[2]),setMonth(temp[1]),setDay(temp[0]),setTime(temp[3])))
 }
 
-async function addLeadsToDB(emails, dateWeb, lastWebID) {
-    const date = new Date()
-    await emails.forEach( leadEmail => {
-        const lead = {
+async function getLastTouch(leadEmail, dateWeb, lastWebID) {
+    var lead = {};
+    const data = await axios.get(`http://localhost:8080/webutms/email/${leadEmail}/`)
+        .then( res => {
+            if(res.data.length > 0 ) {
+                return res.data;
+            } else {
+                return false;
+            }
+        });
+
+    if (!data) {
+        lead = {
             email: leadEmail,
             source: 'none',
-            dateTouch: date,
+            dateTouch: dateWeb,
             dateWeb: dateWeb,
             webName: 'none',
+            webID: lastWebID,
         }
-        axios.post('http://localhost:8080/leads/add/', lead)
-            .then( res => console.log(leadEmail + " was added"));
-    })
+        return false;
+    }    
+    
+    var counter = data.length - 1;
+    while(new Date(data[counter].dateTouch) > dateWeb) {
+        if (counter === 0) {
+            lead = {
+                email: leadEmail,
+                source: 'none',
+                dateTouch: dateWeb,
+                dateWeb: dateWeb,
+                webName: 'none',
+                webID: lastWebID,
+            }
+            return false;
+        }
+        counter = counter - 1;
+    }
+    
+    lead = {
+        email: leadEmail,
+        source: data[counter].source,
+        dateTouch: new Date(data[counter].dateTouch),
+        dateWeb: dateWeb,
+        webName: data[counter].webName,
+        webID: lastWebID,
+    }
+
+    axios.get(`http://localhost:8080/leads/webid/${lastWebID}/${leadEmail}`)
+        .then( res => {
+            if(res.data.length > 0 ) {
+                console.log("Client "+ leadEmail + " with webID: " + lastWebID + " has been already uploaded");
+            } else {
+                axios.post('http://localhost:8080/leads/add/', lead)
+                .then( res => {
+                    console.log(leadEmail + " was added")
+                    console.log(lead)
+                });
+            }
+        });
 }

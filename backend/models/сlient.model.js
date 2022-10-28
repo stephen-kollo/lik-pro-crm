@@ -21,7 +21,9 @@ const clientSchema = new Schema({
     partnerPayout: { type: Number, required: true },
     source: { type: String, required: true },
     dateTouch: { type: Date, required: true },
+    touchWebName: { type: String, required: true},
     dateWeb: { type: Date, required: true },
+    webName: { type: String, required: true},
 }, {
     timestamps: true,
 });

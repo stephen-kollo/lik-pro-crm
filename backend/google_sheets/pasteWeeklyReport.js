@@ -62,7 +62,9 @@ async function setDataToGS(clients, sheet) {
     "Partner Payout",
     "Source",
     "Date Touch",
-    "Date Web"
+    "Touch Web Name",
+    "Date Last Web",
+    "Last Web Name"
   ];
 
   for ( var i = 0; i < columnSchema.length; i++ ) {
@@ -131,7 +133,13 @@ async function setDataToGS(clients, sheet) {
             cell.value = clients[i].dateTouch;
             break;
           case 18:
-            cell.value = clients[i].dateWeb;
+            cell.value = clients[i].touchWebName;
+            break;
+          case 19:
+              cell.value = clients[i].dateWeb;
+              break;
+          case 20:
+            cell.value = clients[i].webName;
             break;
           default:
             console.log('default');

@@ -26,7 +26,9 @@ router.route('/add').post((req, res) => {
     const partnerPayout = req.body.partnerPayout;
     const source = req.body.source;
     const dateTouch = Date.parse(req.body.dateTouch);
+    const touchWebName = req.body.touchWebName;
     const dateWeb = Date.parse(req.body.dateWeb);
+    const webName = req.body.webName;
 
     const newClient = new Client({
         autopayID,
@@ -47,7 +49,9 @@ router.route('/add').post((req, res) => {
         partnerPayout,
         source,
         dateTouch,
+        touchWebName,
         dateWeb,
+        webName,
     });
 
     newClient.save()
@@ -88,7 +92,9 @@ router.route('/update/:id').post((req, res) => {
         client.partnerPayout = req.body.partnerPayout;
         client.source = req.body.source;
         client.dateTouch = req.body.dateTouch;
+        client.touchWebName = req.body.touchWebName;
         client.dateWeb = req.body.dateWeb;
+        client.webName = req.body.webName;
 
         client.save()
             .then(() => res.json('Client updated'))
