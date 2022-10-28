@@ -233,7 +233,6 @@ function convertAutopayXLStoDBformat(xlsFile, settings) {
 
 async function addClientsToDB(clientsData) {
     const clientUTMdata = await getSource.getSource(clientsData.get('email'), new Date((clientsData.get('datePaid').substring(0,10))))
-        // .then(res => {console.log(res)})
     const client = await {
         autopayID: clientsData.get('autopayID'),
         clientName: clientsData.get('clientName'),

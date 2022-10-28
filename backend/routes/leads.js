@@ -8,7 +8,6 @@ router.route('/').get((req, res) => {
 });
 
 router.route('/add').post((req, res) => {
-    
     const email = req.body.email;
     const source = req.body.source;
     const dateTouch = Date.parse(req.body.dateTouch);
@@ -16,7 +15,6 @@ router.route('/add').post((req, res) => {
     const webName = req.body.webName;
     const webID = req.body.webID;
     
-
     const newLead = new Lead({
         email,
         source,
@@ -59,18 +57,6 @@ router.route('/update/:id').post((req, res) => {
     })
     .catch(err => res.status(400).json('Error: ' + err));
 });
-
-// router.route('/paste_weekly_report').post((req, res) => {
-//     const googlesheetsAPI = require('../google_sheets/pasteWeeklyReport');
-//     googlesheetsAPI.pasteWeeklyReport(req.body.link, req.body.datestart, req.body.dateend)
-//     .then((status) => { res.json(status) });
-// });
-
-// router.route('/datepaid/:start/:end').get((req, res) => {
-//     Client.find({datePaid:{$gte: new Date(req.params.start), $lt: new Date(req.params.end)}})
-//     .then(clients => res.json(clients))
-//         .catch(err => res.status(400).json('Error: ' + err));
-// });
 
 router.route('/webid/:webid/:email').get((req, res) => {
     Lead.find({ webID: req.params.webid, email: req.params.email})

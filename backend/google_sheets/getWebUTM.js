@@ -5,7 +5,6 @@ const docID = '1Nng-z-2mBSAGLAyUhwHc0VoeHwaW3nrKj6tzi5qwsGE'
 const num = 145;
 pasteWeeklyReport(docID)
 
-
 async function pasteWeeklyReport(docID) {
     try {
       doc = new GoogleSpreadsheet(docID);

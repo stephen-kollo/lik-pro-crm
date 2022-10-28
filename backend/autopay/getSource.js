@@ -1,6 +1,3 @@
-// getSource('ira.deryabina.89@inbox.ru', new Date('2022-10-25T00:00:00.000Z'))
-//     .then(res => { console.log(res) })
-// console.log(new Date('2022-10-25T00:00:00.000Z'))
 module.exports.getSource =  async function getSource(leadEmail, autopayDate) {
     const axios = require('axios')
     var lead = {};
@@ -44,16 +41,4 @@ module.exports.getSource =  async function getSource(leadEmail, autopayDate) {
         touchWebName: data[counter].webName,
     }
     return lead
-    // axios.get(`http://localhost:8080/leads/webid/${lastWebID}/${leadEmail}`)
-    //     .then( res => {
-    //         if(res.data.length > 0 ) {
-    //             console.log("Client "+ leadEmail + " with webID: " + lastWebID + " has been already uploaded");
-    //         } else {
-    //             axios.post('http://localhost:8080/leads/add/', lead)
-    //             .then( res => {
-    //                 console.log(leadEmail + " was added")
-    //                 console.log(lead)
-    //             });
-    //         }
-    //     });
 }
