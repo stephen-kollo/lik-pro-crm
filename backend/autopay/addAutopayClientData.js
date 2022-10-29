@@ -2,11 +2,12 @@ const {Builder, Browser, By, Key, until} = require('selenium-webdriver');
 require('chromedriver');
 const axios = require('axios');
 const getSource = require('./getSource');
+const partners = require('./countPartnersRevenue');
 
 module.exports.addAutopayClientData = async function addAutopayClientData() {
     const settings = await axiosGetSettings();
-    const driver = await buildDriver()
-    await getDailyDataAutopay(driver, By, settings);
+    // const driver = await buildDriver()
+    // await getDailyDataAutopay(driver, By, settings);
     await setTimeout(async function () { addAutopayXLStoDB(settings) }, 1000);
 };
 
@@ -184,6 +185,8 @@ function convertAutopayXLStoDBformat(xlsFile, settings) {
             }
             return payout;
         }
+        
+        
 
         const revenue = setRevenue(clientData.get(clientMap.get('revenue')));
         const status = setStatus(clientData.get(clientMap.get('status')));
@@ -233,6 +236,10 @@ function convertAutopayXLStoDBformat(xlsFile, settings) {
 
 async function addClientsToDB(clientsData) {
     const clientUTMdata = await getSource.getSource(clientsData.get('email'), new Date((clientsData.get('datePaid').substring(0,10))))
+    
+    const partnerPayout = await partners.getPartnersRevenue(clientsData);
+    console.log(partnerPayout)
+    console.log(clientsData)
     const client = await {
         autopayID: clientsData.get('autopayID'),
         clientName: clientsData.get('clientName'),

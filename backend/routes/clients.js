@@ -121,4 +121,10 @@ router.route('/autopayid/:autopayid').get((req, res) => {
         .catch(err => res.status(400).json('Error: ' + err));
 });
 
+router.route('/email/:email').get((req, res) => {
+    Client.find({ email: req.params.email, })
+    .then(clients => res.json(clients))
+        .catch(err => res.status(400).json('Error: ' + err));
+});
+
 module.exports = router;
